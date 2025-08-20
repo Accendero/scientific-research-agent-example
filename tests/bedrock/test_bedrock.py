@@ -3,8 +3,12 @@
 import boto3
 import json
 import os
+import dotenv
 
 from botocore.exceptions import ClientError
+
+#Load environment variables
+dotenv.load_dotenv()
 
 # Create a Bedrock Runtime client in the AWS Region of your choice.
 client = boto3.client("bedrock-runtime", region_name=os.environ["AWS_REGION"])
