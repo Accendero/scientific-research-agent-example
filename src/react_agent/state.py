@@ -1,60 +1,48 @@
-"""Define the state structures for the agent."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Sequence
+from typing import TypedDict
 
-from langchain_core.messages import AnyMessage
 from langgraph.graph import add_messages
-from langgraph.managed import IsLastStep
 from typing_extensions import Annotated
 
 
-@dataclass
-class InputState:
-    """Defines the input state for the agent, representing a narrower interface to the outside world.
-
-    This class is used to define the initial state and structure of incoming data.
-    """
-
-    messages: Annotated[Sequence[AnyMessage], add_messages] = field(
-        default_factory=list
-    )
-    """
-    Messages tracking the primary execution state of the agent.
-
-    Typically accumulates a pattern of:
-    1. HumanMessage - user input
-    2. AIMessage with .tool_calls - agent picking tool(s) to use to collect information
-    3. ToolMessage(s) - the responses (or errors) from the executed tools
-    4. AIMessage without .tool_calls - agent responding in unstructured format to the user
-    5. HumanMessage - user responds with the next conversational turn
-
-    Steps 2-5 may repeat as needed.
-
-    The `add_messages` annotation ensures that new messages are merged with existing ones,
-    updating by ID to maintain an "append-only" state unless a message with the same ID is provided.
-    """
+import operator
 
 
-@dataclass
-class State(InputState):
-    """Represents the complete state of the agent, extending InputState with additional attributes.
+class OverallState(TypedDict):
+    messages: Annotated[list, add_messages]
+    search_query: Annotated[list, operator.add]
+    web_research_result: Annotated[list, operator.add]
+    sources_gathered: Annotated[list, operator.add]
+    initial_search_query_count: int
+    max_research_loops: int
+    research_loop_count: int
+    reasoning_model: str
 
-    This class can be used to store any information needed throughout the agent's lifecycle.
-    """
 
-    is_last_step: IsLastStep = field(default=False)
-    """
-    Indicates whether the current step is the last one before the graph raises an error.
+class ReflectionState(TypedDict):
+    is_sufficient: bool
+    knowledge_gap: str
+    follow_up_queries: Annotated[list, operator.add]
+    research_loop_count: int
+    number_of_ran_queries: int
 
-    This is a 'managed' variable, controlled by the state machine rather than user code.
-    It is set to 'True' when the step count reaches recursion_limit - 1.
-    """
 
-    # Additional attributes can be added here as needed.
-    # Common examples include:
-    # retrieved_documents: List[Document] = field(default_factory=list)
-    # extracted_entities: Dict[str, Any] = field(default_factory=dict)
-    # api_connections: Dict[str, Any] = field(default_factory=dict)
+class Query(TypedDict):
+    query: str
+    rationale: str
+
+
+class QueryGenerationState(TypedDict):
+    search_query: list[Query]
+
+
+class WebSearchState(TypedDict):
+    search_query: str
+    id: str
+
+
+@dataclass(kw_only=True)
+class SearchStateOutput:
+    running_summary: str = field(default=None)  # Final report
