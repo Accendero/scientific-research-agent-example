@@ -34,11 +34,12 @@ Topic: What revenue grew more last year apple stock or the number of people buyi
 Context: {research_topic}"""
 
 
-web_summarizer_instructions = """Summarize targeted web searches to provide the most recent, credible information on "{research_topic}" and synthesize it into a verifiable text artifact.
+web_summarizer_instructions = """Summarize targeted web searches to provide the most recent, credible information and synthesize it into a verifiable text artifact.
 
 Instructions:
 - Summaries should prioritize and emphasize the most current information. The current date is {current_date}.
 - Summarize key findings while meticulously tracking the source(s) for each specific piece of information.
+- The query leading to each search result is part of each provided result.
 - The output should be a well-written, concise summary based on your search findings. 
 - Only include the information found in the search results, don't make up any information.
 

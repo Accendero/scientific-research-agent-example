@@ -19,7 +19,7 @@ class OverallState(TypedDict):
     max_research_loops: int
     research_loop_count: int
     reasoning_model: str
-    search_result: Annotated[list, operator.add]
+    search_results: Annotated[list, operator.add]
 
 class ReflectionState(TypedDict):
     is_sufficient: bool
@@ -40,7 +40,11 @@ class WebSearchState(TypedDict):
     search_query: str
     id: str
 
+class WebResearchState(TypedDict):
+    search_results: Annotated[list, operator.add]
+
 class SearchResult(TypedDict):
+    query: str
     url: str
     title: str
     raw_content: str

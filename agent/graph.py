@@ -15,6 +15,7 @@ from .state import (
     QueryGenerationState,
     ReflectionState,
     WebSearchState,
+    WebResearchState,
     SearchResult,
 )
 from .configuration import Configuration
@@ -81,7 +82,7 @@ def continue_to_web_research(state: QueryGenerationState):
     This is used to spawn n number of web research nodes, one for each search query.
     """
     return [
-        Send("web_research", {"search_query": search_query, "id": int(idx)})
+        Send("web_research_search", {"search_query": search_query, "id": int(idx)})
         for idx, search_query in enumerate(state["search_query"])
     ]
 
@@ -104,13 +105,15 @@ def web_research_search(state: WebSearchState, config: RunnableConfig) -> Overal
         topic="general",
         include_raw_content=True,
     )
-    response = tool.invoke(query=state["search_query"])
+    response = tool.invoke({"query":state["search_query"]})
     for result in response["results"]:
         if result['raw_content'] and result['url'] and result['title']:
-            search_results.append(SearchResult(url=result['url'], title=result['title'], raw_content=result['raw_content']))
-    return {"search_results": search_results}
+            search_results.append(SearchResult(query=state["search_query"],url=result['url'], title=result['title'], raw_content=result['raw_content']))
+    return {
+        "search_results": search_results
+    }
 
-def web_research_report(state: WebSearchState, config: RunnableConfig) -> OverallState:
+def web_research_report(state: WebResearchState, config: RunnableConfig) -> OverallState:
     """LangGraph node that performs web research using the native Google Search API tool.
 
     Executes a web search using the native Google Search API tool in combination with Gemini 2.0 Flash.
@@ -124,16 +127,17 @@ def web_research_report(state: WebSearchState, config: RunnableConfig) -> Overal
     """
     sources_gathered = []
     text_results = ""
+    searches = []
     for result in state["search_results"]:
-        sources_gathered.append(result.url)
-        text_results += "Title:{}\nUrl:{}\nContent:{}".format(result.title, result.url, result.raw_content)
+        searches.append(result["query"])
+        sources_gathered.append(result["url"])
+        text_results += "Query:{}\nTitle:{}\nUrl:{}\nContent:{}".format(result["query"],result["title"], result["url"], result["raw_content"])
         text_results += "\n---\n\n"
 
     # Configure
     configurable = Configuration.from_runnable_config(config)
     formatted_prompt = web_summarizer_instructions.format(
         current_date=get_current_date(),
-        research_topic=state["search_query"],
         results=text_results
     )
 
@@ -147,7 +151,7 @@ def web_research_report(state: WebSearchState, config: RunnableConfig) -> Overal
 
     return {
         "sources_gathered": sources_gathered,
-        "search_query": [state["search_query"]],
+        "search_query": list(set(searches)),
         "web_research_result": [ai_msg.content],
     }
 
@@ -221,7 +225,7 @@ def evaluate_research(
     else:
         return [
             Send(
-                "web_research",
+                "web_research_search",
                 {
                     "search_query": follow_up_query,
                     "id": state["number_of_ran_queries"] + int(idx),
