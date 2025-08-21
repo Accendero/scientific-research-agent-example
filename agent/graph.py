@@ -102,13 +102,12 @@ def web_research_search(state: WebSearchState, config: RunnableConfig) -> Overal
     search_results = []
     tool = TavilySearch(
         max_results=configurable.search_depth,
-        topic="general",
-        include_raw_content=True,
+        topic="general"
     )
     response = tool.invoke({"query":state["search_query"]})
     for result in response["results"]:
         if result['raw_content'] and result['url'] and result['title']:
-            search_results.append(SearchResult(query=state["search_query"],url=result['url'], title=result['title'], raw_content=result['raw_content']))
+            search_results.append(SearchResult(query=state["search_query"],url=result['url'], title=result['title'], raw_content=result['content']))
     return {
         "search_results": search_results
     }
@@ -135,7 +134,6 @@ def web_research_report(state: WebResearchState, config: RunnableConfig) -> Over
         text_results += "\n---\n\n"
 
     # Configure
-    configurable = Configuration.from_runnable_config(config)
     formatted_prompt = web_summarizer_instructions.format(
         current_date=get_current_date(),
         results=text_results
@@ -152,7 +150,7 @@ def web_research_report(state: WebResearchState, config: RunnableConfig) -> Over
     return {
         "sources_gathered": sources_gathered,
         "search_query": list(set(searches)),
-        "web_research_result": [ai_msg.content],
+        "web_research_result": [result.content],
     }
 
 

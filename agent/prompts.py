@@ -39,12 +39,9 @@ web_summarizer_instructions = """Summarize targeted web searches to provide the 
 Instructions:
 - Summaries should prioritize and emphasize the most current information. The current date is {current_date}.
 - Summarize key findings while meticulously tracking the source(s) for each specific piece of information.
-- The query leading to each search result is part of each provided result.
+- The research topic leading to each search result is part of each provided result as the "Query".
 - The output should be a well-written, concise summary based on your search findings. 
 - Only include the information found in the search results, don't make up any information.
-
-Research Topic:
-{research_topic}
 
 Output Format:
 - Format the result as a text document of the summaries with --- between summary sections that include the title and url.
@@ -110,7 +107,11 @@ Instructions:
 - You have access to all the information gathered from the previous steps.
 - You have access to the user's question.
 - Generate a high-quality answer to the user's question based on the provided summaries and the user's question.
-- Include the sources you used from the Summaries in the answer correctly, use markdown format (e.g. [apnews](https://vertexaisearch.cloud.google.com/id/1-0)). THIS IS A MUST.
+- Include the sources you used from the Summaries in the answer correctly, use markdown format. THIS IS A MUST.
+- Every fact stated in the write-up MUST have a corresponding citation, no exceptions.
+
+Example of a statement of a fact:
+This is a fact about the topic. [EFF](https://eff.org)
 
 User Context:
 - {research_topic}
