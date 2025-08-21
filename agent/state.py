@@ -13,13 +13,13 @@ import operator
 class OverallState(TypedDict):
     messages: Annotated[list, add_messages]
     search_query: Annotated[list, operator.add]
-    web_research_result: Annotated[list, operator.add]
+    web_research_result: str
     sources_gathered: Annotated[list, operator.add]
     initial_search_query_count: int
     max_research_loops: int
     research_loop_count: int
     reasoning_model: str
-
+    search_result: Annotated[list, operator.add]
 
 class ReflectionState(TypedDict):
     is_sufficient: bool
@@ -27,7 +27,6 @@ class ReflectionState(TypedDict):
     follow_up_queries: Annotated[list, operator.add]
     research_loop_count: int
     number_of_ran_queries: int
-
 
 class Query(TypedDict):
     query: str
@@ -37,11 +36,14 @@ class Query(TypedDict):
 class QueryGenerationState(TypedDict):
     search_query: list[Query]
 
-
 class WebSearchState(TypedDict):
     search_query: str
     id: str
 
+class SearchResult(TypedDict):
+    url: str
+    title: str
+    raw_content: str
 
 @dataclass(kw_only=True)
 class SearchStateOutput:
