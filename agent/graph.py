@@ -1,4 +1,5 @@
 import os
+import time
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage
 from langgraph.types import Send
@@ -88,7 +89,7 @@ def continue_to_web_research(state: QueryGenerationState):
 
 
 def web_research_search(state: WebSearchState, config: RunnableConfig) -> OverallState:
-    """LangGraph node that searches Tavily for results on a topic.
+    """LangGraph node that searches PubMed for results on a topic.
 
     Args:
         state: Current graph state containing the search query and research loop count
@@ -100,30 +101,37 @@ def web_research_search(state: WebSearchState, config: RunnableConfig) -> Overal
     
     configurable = Configuration.from_runnable_config(config)
     search_results = []
-    pm_ids = PubMedFetcher.pmids_for_query(
+    fetcher = PubMedFetcher()
+    pm_ids = fetcher.pmids_for_query(
         query=state["search_query"],
         retmax=configurable.search_depth
     )
+    #Only neccesary if you do not have an NCBI key.
+    time.sleep(1.5)
     for id in pm_ids:
-        abstract = PubMedFetcher.article_by_pmid(id)
+        abstract = fetcher.article_by_pmid(id)
+        #Only neccesary if you do not have an NCBI key.
+        time.sleep(1.5)
         if abstract.abstract is None:
             continue
-        search_results.append(SearchResult(
-            query=state["search_query"],
-            id=id, 
-            title=abstract.title,
-            year=int(abstract.year),
-            citation=abstract.citation,
-            abstract=abstract.abstract
-        ))
+        #Each abstract might be missing key pieces.
+        try:
+            search_results.append(SearchResult(
+                query=state["search_query"],
+                id=id, 
+                title=abstract.title,
+                year=int(abstract.year),
+                citation=abstract.citation,
+                abstract=abstract.abstract
+            ))
+        except:
+            continue
     return {
         "search_results": search_results
     }
 
 def web_research_report(state: WebResearchState, config: RunnableConfig) -> OverallState:
-    """LangGraph node that performs web research using the native Google Search API tool.
-
-    Executes a web search using the native Google Search API tool in combination with Gemini 2.0 Flash.
+    """LangGraph node that summarizes results from a web search.
 
     Args:
         state: Current graph state containing the search query and research loop count
@@ -137,7 +145,7 @@ def web_research_report(state: WebResearchState, config: RunnableConfig) -> Over
     searches = []
     for result in state["search_results"]:
         searches.append(result["query"])
-        sources_gathered.append(result["url"])
+        sources_gathered.append(result["id"])
         text_results += "Query:{}\nTitle:{}\nPMID:{}\nAbstract:{}\nCitation:{}".format(
             result["query"],
             result["title"], 
