@@ -7,7 +7,7 @@ from langgraph.graph import START, END
 from langchain_core.runnables import RunnableConfig
 import boto3
 from langchain_aws import ChatBedrockConverse
-from langchain_tavily import TavilySearch
+from metapub import PubMedFetcher
 
 from .tools_and_schemas import SearchQueryList, Reflection
 from .state import (
@@ -100,14 +100,22 @@ def web_research_search(state: WebSearchState, config: RunnableConfig) -> Overal
     
     configurable = Configuration.from_runnable_config(config)
     search_results = []
-    tool = TavilySearch(
-        max_results=configurable.search_depth,
-        topic="general"
+    pm_ids = PubMedFetcher.pmids_for_query(
+        query=state["search_query"],
+        retmax=configurable.search_depth
     )
-    response = tool.invoke({"query":state["search_query"]})
-    for result in response["results"]:
-        if result['raw_content'] and result['url'] and result['title']:
-            search_results.append(SearchResult(query=state["search_query"],url=result['url'], title=result['title'], raw_content=result['content']))
+    for id in pm_ids:
+        abstract = PubMedFetcher.article_by_pmid(id)
+        if abstract.abstract is None:
+            continue
+        search_results.append(SearchResult(
+            query=state["search_query"],
+            id=id, 
+            title=abstract.title,
+            year=int(abstract.year),
+            citation=abstract.citation,
+            abstract=abstract.abstract
+        ))
     return {
         "search_results": search_results
     }
@@ -130,7 +138,13 @@ def web_research_report(state: WebResearchState, config: RunnableConfig) -> Over
     for result in state["search_results"]:
         searches.append(result["query"])
         sources_gathered.append(result["url"])
-        text_results += "Query:{}\nTitle:{}\nUrl:{}\nContent:{}".format(result["query"],result["title"], result["url"], result["raw_content"])
+        text_results += "Query:{}\nTitle:{}\nPMID:{}\nAbstract:{}\nCitation:{}".format(
+            result["query"],
+            result["title"], 
+            result["id"],
+            result["abstract"],
+            result["citation"]
+        )
         text_results += "\n---\n\n"
 
     # Configure

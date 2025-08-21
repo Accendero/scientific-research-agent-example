@@ -45,9 +45,11 @@ class WebResearchState(TypedDict):
 
 class SearchResult(TypedDict):
     query: str
-    url: str
+    id: str 
     title: str
-    raw_content: str
+    year: int
+    citation: str
+    abstract: str
 
 @dataclass(kw_only=True)
 class SearchStateOutput:

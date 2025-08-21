@@ -8,4 +8,6 @@ boto3==1.39.11
 langgraph==0.6.6
 langchain-core==0.3.74
 langchain-aws==0.2.31
-langchain-tavily==0.2.11
+
+#metapub
+metapub==0.6.3

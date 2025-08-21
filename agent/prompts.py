@@ -15,6 +15,7 @@ Instructions:
 - Queries should be diverse, if the topic is broad, generate more than 1 query.
 - Don't generate multiple similar queries, 1 is enough.
 - Query should ensure that the most current information is gathered. The current date is {current_date}.
+- Only use keywords in the query
 
 Format: 
 - Format your response as a JSON object with ALL two of these exact keys:
@@ -23,40 +24,43 @@ Format:
 
 Example:
 
-Topic: What revenue grew more last year apple stock or the number of people buying an iphone
+Topic: What were the highest performing therapeutics approved in 2020 that target T Cells? 
 ```json
 {{
-    "rationale": "To answer this comparative growth question accurately, we need specific data points on Apple's stock performance and iPhone sales metrics. These queries target the precise financial information needed: company revenue trends, product-specific unit sales figures, and stock price movement over the same fiscal period for direct comparison.",
-    "query": ["Apple total revenue growth fiscal year 2024", "iPhone unit sales growth fiscal year 2024", "Apple stock price growth fiscal year 2024"],
+    "rationale": "To answer this question accurately, we need to know which therapeutics that target T Cells were approved in 2020 by key regulators, like FDA and EMA. We also need to know performance of therapeutics approved in 2020, this could be fiscal or patient success.",
+    "query": ["T Cell therapeutics revenue 2020", "T Cell Therapeutics FDA EMA approval", "T Cell therapeutics highest patient efficacy 2020"],
 }}
 ```
 
 Context: {research_topic}"""
 
 
-web_summarizer_instructions = """Summarize targeted web searches to provide the most recent, credible information and synthesize it into a verifiable text artifact.
+web_summarizer_instructions = """Summarize targeted PubMed to provide the most recent, credible information and synthesize it into a verifiable text artifact.
 
 Instructions:
-- Summaries should prioritize and emphasize the most current information. The current date is {current_date}.
+- While older abstracts can still be accurate, abstracts closer to the current date can reflect more current information. The current date is {current_date}.
 - Summarize key findings while meticulously tracking the source(s) for each specific piece of information.
 - The research topic leading to each search result is part of each provided result as the "Query".
-- The output should be a well-written, concise summary based on your search findings. 
+- Abstracts are provided, so only remove concepts or statements from summaries that are not relevant to the search.
+- The output should be a well-written and concise based on your search findings, but, as above, should be comprehensive of the provided abstracts.
 - Only include the information found in the search results, don't make up any information.
 
 Output Format:
-- Format the result as a text document of the summaries with --- between summary sections that include the title and url.
+- Format the result as a text document of the summaries with --- between summary sections.
 
 Example:
 
- Title:Page 1
- Url:http://www.example.com/page1
- Summary:This is a summary of page 1.
+ Title:Article 1
+ PMID:40818454
+ Abstract summary:This is a summary of abstract 1.
+ Citation:Citation 1.
 
 ---
 
- Title:Page 2
- Url:http://www.example.com/page2
- Summary:This is a summary of page 2.
+ Title:Article 2
+ PMID:40818454
+ Abstract summary:This is a summary of abstract 2.
+ Citation:Citation 2.
 
  ---
 
