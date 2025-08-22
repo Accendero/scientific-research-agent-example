@@ -1,3 +1,10 @@
+###
+# This module is based on https://github.com/google-gemini/gemini-fullstack-langgraph-quickstart/blob/main/backend/src/agent/state.py
+# See the README for more information
+# It may contain significant modifications for exploratory puposes.
+###
+
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

@@ -1,3 +1,9 @@
+###
+# This module is based on https://github.com/google-gemini/gemini-fullstack-langgraph-quickstart/blob/main/backend/src/agent/configuration.py
+# See the README for more information
+# It may contain significant modifications for exploratory puposes.
+###
+
 import os
 from pydantic import BaseModel, Field
 from typing import Any, Optional

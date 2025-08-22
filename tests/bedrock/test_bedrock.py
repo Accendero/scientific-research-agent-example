@@ -1,4 +1,7 @@
-# Use the native inference API to send a text message to Anthropic Claude.
+###
+# Use the native inference API to send a text message to Anthropic Claude. 
+# Lightly modified from: AWS support documentation.
+###
 
 import boto3
 import json

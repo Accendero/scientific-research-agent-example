@@ -1,3 +1,9 @@
+###
+# This module is based on https://github.com/google-gemini/gemini-fullstack-langgraph-quickstart/blob/main/backend/src/agent/graph.py
+# See the README for more information
+# It may contain significant modifications for exploratory puposes.
+###
+
 import os
 import time
 from dotenv import load_dotenv

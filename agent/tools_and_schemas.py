@@ -1,3 +1,9 @@
+###
+# This module is based on https://github.com/google-gemini/gemini-fullstack-langgraph-quickstart/blob/main/backend/src/agent/tools_and_schemas.py
+# See the README for more information
+# It may contain significant modifications for exploratory puposes.
+###
+
 from typing import List
 from pydantic import BaseModel, Field
 
