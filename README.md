@@ -5,6 +5,7 @@ A demonstration of an AI-powered scientific research agent that automates litera
 **Overview & Intended Purpose**
 
 This repo is intended for exploration and prototyping. It is companion code for the "Let's Build" newsletter here:
+https://www.linkedin.com/pulse/lets-build-scientific-research-agent-alan-barber-62x9c
 
 As noted in the newsletter, significant parts of the code are based on the code found here:
 https://github.com/google-gemini/gemini-fullstack-langgraph-quickstart
